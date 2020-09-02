@@ -3,44 +3,42 @@ const validator = require('validator');
 // const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcryptjs');
 
-var userSchema = new mongoose.Schema({
-  email: {
+var matchSchema = new mongoose.Schema({
+  date: {
     type: String,
     required: true,
-    lowercase: true,
-    trim: true,
-    minlength: 3,
-    unique: true,
-    validate: {
-      validator: validator.isEmail,
-      message: '{VALUE} is not a valid email'
-    }
+    unique: true
   },
-  name: {
-    type: String,
-    trim: true,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 7
-  },
-  validatedUser: {
-    type: Boolean,
-    default: false
-  },
-  tokens: [{
-    access: {
-      type: String,
-      required: true
+  sets: [{
+    num: {
+      type: Number,
+      min: 1,
+      max: 4
     },
-    token: {
-      type: String,
-      required: true
-    },
+    court: [{
+      number: {
+        type: Number,
+        min: 1,
+        max: 6
+      },
+      players: [{
+        name: {
+          type: String
+        },
+        gamesplayed: {
+          type: Number,
+          min: 0,
+          default: 0
+        },
+        gameswon: {
+          type: Number,
+          min: 0,
+          default: 0
+        }
+      }]
+    }]
   }]
-});
+})
 
 // userSchema.methods.generateAuthToken = function () {
 //   var user = this;
@@ -120,4 +118,4 @@ var userSchema = new mongoose.Schema({
 // });
 
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Match', matchSchema);
