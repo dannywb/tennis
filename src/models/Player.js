@@ -20,7 +20,19 @@ var playerSchema = new mongoose.Schema({
       validator: validator.isEmail,
       message: '{VALUE} is not a valid email'
     }
-}, 
+  },
+  rank: {
+    type: Number,
+    default: 0
+  },
+  totalGamesPlayed: {
+    type: Number,
+    default: 0
+  }, 
+  totalGamesWon: {
+    type: Number,
+    default: 0
+  },
   active: {
     type: Boolean,
     default: true
