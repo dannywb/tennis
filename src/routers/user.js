@@ -15,6 +15,17 @@ router.post('/maint/users', async (req, res) => {
   }
 })
 
+router.post('/users/login', async (req, res) => {
+  try {
+    const user = await User.findByCredentials(req.body.email, req.body.password)
+    res.send(user)
+  } catch (e) {
+    console.log('Error in router.post')
+    console.log(e)
+    res.status(400).send()
+  }
+})
+
 // Find all users
 router.get('/maint/users', async (req, res) => {
 

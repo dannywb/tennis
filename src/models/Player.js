@@ -37,6 +37,10 @@ var playerSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  selected: {
+    type: Boolean,
+    default: false
+  },
   matches:[{
     date: {
       type: String,

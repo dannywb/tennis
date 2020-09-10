@@ -60,7 +60,7 @@ router.get('/players/name/:name', async (req, res) => {
 // Update player data by ID
 router.patch('/players/id/:id', async (req, res) => {
   const updates = Object.keys(req.body)
-  const allowedUpdates = ['name', 'email', 'active', 'matches']
+  const allowedUpdates = ['name', 'email', 'active', 'matches', 'totalGamesPlayed', 'totalGamesWon', 'selected']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
   if (!isValidOperation) {
@@ -83,27 +83,27 @@ router.patch('/players/id/:id', async (req, res) => {
   }
 })
 
-// Update player data by name
-router.patch('/players/name/:name', async (req, res) => {
-  const updates = Object.keys(req.body)
-  const allowedUpdates = ['name', 'email', 'active', 'matches']
-  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+// // Update player data by name
+// router.patch('/players/name/:name', async (req, res) => {
+//   const updates = Object.keys(req.body)
+//   const allowedUpdates = ['name', 'email', 'active', 'matches', 'totalGamesPlayed', 'totalGamesWon', 'selected']
+//   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
-  if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!'})
-  }
+//   if (!isValidOperation) {
+//     return res.status(400).send({ error: 'Invalid updates!'})
+//   }
 
-  try {
-    var query = { name: `${req.params.name}`}
-    const player = await Player.findOneAndUpdate(query, req.body, { new: true, runValidators: true})
+//   try {
+//     var query = { name: `${req.params.name}`}
+//     const player = await Player.findOneAndUpdate(query, req.body, { new: true, runValidators: true})
 
-    if (!player) {
-      return res.status(404).send()
-    }
-    res.send(player)
-  } catch (e) {
-    res.status(400).send(e)
-  }
-})
+//     if (!player) {
+//       return res.status(404).send()
+//     }
+//     res.send(player)
+//   } catch (e) {
+//     res.status(400).send(e)
+//   }
+// })
 
 module.exports = router
