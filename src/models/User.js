@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
@@ -37,40 +37,76 @@ const userSchema = new mongoose.Schema({
       }
     }
   },
+  rank: {
+    type: Number,
+    default: 0
+  },
+  totalGamesPlayed: {
+    type: Number,
+    default: 0
+  }, 
+  totalGamesWon: {
+    type: Number,
+    default: 0
+  },
   approved: {
     type: Boolean,
     default: false
-  }
+  },
+  matches:[{
+    date: {
+      type: String,
+      required: true
+    },
+    verified: {
+      type: Boolean,
+      default: false
+    },
+    gamesPlayed: {
+      type: Number,
+      required: true,
+      min: 0
+    }, 
+    gamesWon: {
+      type: Number,
+      required: true,
+      min: 0
+    }
+  }],
+  tokens: [{
+    token: {
+      type: String,
+      required: true
+    }
+  }]
+}, {
+  timestamps: true
 })
 
-// userSchema.methods.generateAuthToken = function () {
-//   var user = this;
-//   var access = 'auth';
-//   var token = jwt.sign({_id: user._id.toHexString(), access}, 'jakata').toString();
+userSchema.methods.toJSON = function () {
+  const user = this
+  const userObject = user.toObject()
 
-//   user.tokens = user.tokens.concat([{access, token}]);
+  delete userObject.tokens
+  delete userObject.password
 
-//   return user.save().then(() => {
-//     return token;
-//   });
-// };
+  return userObject
+}
 
-// userSchema.statics.findByToken = function (token) {
-//   var User = this;
-//   var decoded;
+userSchema.methods.generateAuthToken = async function () {
+  const user = this
+  const token = jwt.sign({_id: user._id.toString()}, 'jakataisonehellofaplacetovisit').toString()
 
-//   try {
-//     decoded = jwt.verify(token, 'jakata');
-//   } catch (e) {
-//     return Promise.reject();
-//   }
+  if (user.approved) {
+    user.tokens = user.tokens.concat({token})
+    await user.save()
+    return token
+  }
 
-//   return User.findOne({
-//     '_id': decoded._id,
-//     'tokens.token': token,
-//     'tokens.access': 'auth'
-//   });
-// };
+  const msg = 'User has not been approved for access'
+  return msg
+};
+
 
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({email})
@@ -90,34 +126,6 @@ userSchema.statics.findByCredentials = async (email, password) => {
   return user
 
 }
-
-// userSchema.pre('save', function (next) {
-//   var user = this;
-
-//   if (user.isModified('password')) {
-//     bcrypt.genSalt(12, (err, salt) => {
-//       bcrypt.hash(user.password, salt, (err, hash) => {
-//         user.password = hash;
-//         next();
-//       });
-//     });
-//   } else {
-//     next();
-//   }
-// });
-// userSchema.pre('save', function (next) {
-//   var user = this;
-//
-//   if (user.isModified('password')) {
-//     bcrypt.genSalt(13, (err, salt) => {
-//       bcrypt.hash(user.password, salt, (err, hash) => {
-//         user.password = hash;
-//         next();
-//       });
-//     } else {
-//     next();
-//     }
-// });
 
 userSchema.pre('save', async function (next) {
   const user = this

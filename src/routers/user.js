@@ -1,24 +1,36 @@
 const express = require('express')
 const User = require('../models/User')
+const auth = require('../middleware/auth')
+const authAdmin = require('../middleware/admin')
 const router = new express.Router()
 
 // Routes for Users
 // Add a new user
-router.post('/maint/users', async (req, res) => {
+router.post('/user', async (req, res) => {
   const user = new User(req.body)
 
   try {
     await user.save()
-    res.status(201).send(user)
+    const token = await user.generateAuthToken()
+    if (token == 'User has not been approved for access') {
+      return res.status(202).send(token)
+    }
+
   } catch (e) {
     res.status(400).send(e)
   }
 })
 
-router.post('/users/login', async (req, res) => {
+// User login
+router.post('/user/login', async (req, res) => {
   try {
     const user = await User.findByCredentials(req.body.email, req.body.password)
-    res.send(user)
+    const token = await user.generateAuthToken()
+
+    if (token == 'User has not been approved for access') {
+      return res.send(token)
+    }
+    res.send({user, token})
   } catch (e) {
     console.log('Error in router.post')
     console.log(e)
@@ -27,7 +39,7 @@ router.post('/users/login', async (req, res) => {
 })
 
 // Find all users
-router.get('/maint/users', async (req, res) => {
+router.get('/maint/users', authAdmin, async (req, res) => {
 
   try {
     const users = await User.find({})
@@ -37,8 +49,48 @@ router.get('/maint/users', async (req, res) => {
   }
 })
 
+// Get all users
+router.get('/users', auth, async (req, res) => {
+
+  try {
+    const users = await User.find({})
+    res.send(users)
+  } catch (e) {
+    res.status(500).send()
+  }
+})
+
+// Get user (your) information
+router.get('/user/me', auth, async (req, res) => {
+
+  res.send(req.user)
+})
+
+// Update user information
+router.patch('/user/me', auth, async (req, res) => {
+  const updates = Object.keys(req.body)
+  const allowedUpdates = ['name', 'email', 'password', 'matches.gamesPlayed', 'matches.gamesWon']
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+  if (!isValidOperation) {
+    return res.status(400).send({ error: 'Invalid updates!'})
+  }
+
+  try {
+
+    updates.forEach((update) => req.user[update] = req.body[update])
+
+    await req.user.save()
+
+    res.send(req.user)
+  } catch (e) {
+    res.status(400).send(e)
+  }
+})
+
+
 // Get user by ID
-router.get('/maint/users/id/:id', async (req, res) => {
+router.get('/maint/users/id/:id', authAdmin, async (req, res) => {
   const _id = req.params.id
 
   try  {
@@ -52,25 +104,11 @@ router.get('/maint/users/id/:id', async (req, res) => {
   }
 })
 
-// Get user by name
-router.get('/maint/users/name/:name', async (req, res) => {
-  const name = req.params.name
 
-  try {
-    const user = await User.findOne({ name })
-    if (!user) {
-      return res.status(404).send()
-    }
-    res.send(user)
-  } catch (e) {
-    res.status(500).send()
-  }
-})
-
-// Update player data by ID
-router.patch('/maint/users/id/:id', async (req, res) => {
+// Update user data by ID ADMIN FUNCTION
+router.patch('/maint/users/id/:id', authAdmin, async (req, res) => {
   const updates = Object.keys(req.body)
-  const allowedUpdates = ['name', 'email', 'userLevel', 'password', 'approved']
+  const allowedUpdates = ['name', 'email', 'userLevel', 'password', 'approved', 'matches']
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
   if (!isValidOperation) {
@@ -90,6 +128,30 @@ router.patch('/maint/users/id/:id', async (req, res) => {
     res.send(user)
   } catch (e) {
     res.status(400).send(e)
+  }
+})
+
+// Log out user
+router.post('/user/logout', auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token
+    })
+    await req.user.save()
+
+    res.send()
+  } catch (e) {
+    res.status(500)
+  }
+})
+
+router.post('/user/logoutAll', auth, async (req, res) => {
+  try {
+    req.user.tokens = []
+    await req.user.save()
+    res.send()
+  } catch (e) {
+    res.status(500)
   }
 })
 

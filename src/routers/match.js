@@ -20,9 +20,9 @@ router.patch('/maint/matches/update/:date', async (req, res) => {
   const match = new Match(req.body)
 
   try {
-    var queryStr = req.params.date
-    var newQueryStr = queryStr.replace(/-/g, '/')
-    var query = { date: `${newQueryStr}`}
+    const queryStr = req.params.date
+    const newQueryStr = queryStr.replace(/-/g, '/')
+    const query = { date: `${newQueryStr}`}
 
     const match = await Match.findOneAndUpdate(query, req.body, { new: true, runValidators: true})
 

@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js --ext js,hbs"
+    "start": "node index.js",
+    "dev": "nodemon index.js --ext js,hbs,handlebars"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "bootstrap": "^4.5.2",
     "express": "^4.17.1",
-    "hbs": "^4.1.1",
+    "express-handlebars": "^5.1.0",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.0",
     "mongoose": "^5.10.2",
     "validator": "^13.1.1"
