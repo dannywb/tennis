@@ -18,7 +18,7 @@ app.set('view engine', 'handlebars')
 // app.use('/static', express.static('public'))
 app.use(express.static(path.join(__dirname, 'assets')))
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 app.use(express.json())
 app.use(userRouter)

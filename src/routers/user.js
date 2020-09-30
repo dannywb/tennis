@@ -2,6 +2,7 @@ const express = require('express')
 const User = require('../models/User')
 const auth = require('../middleware/auth')
 const authAdmin = require('../middleware/admin')
+const { sendWelcomeEmail } = require('../emails/account')
 const router = new express.Router()
 
 // Routes for Users
@@ -11,6 +12,7 @@ router.post('/user', async (req, res) => {
 
   try {
     await user.save()
+    sendWelcomeEmail(user.email, user.name)
     const token = await user.generateAuthToken()
     if (token == 'User has not been approved for access') {
       return res.status(202).send(token)

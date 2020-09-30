@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 var matchSchema = new mongoose.Schema({
   date: {
@@ -10,23 +10,23 @@ var matchSchema = new mongoose.Schema({
     unique: true
   },
   sets: [{
-    num: {
+    setnumber: {
       type: Number,
       min: 1,
-      max: 4
+      max: 3
     },
     court: [{
-      number: {
+      courtnumber: {
         type: Number,
         min: 1,
-        max: 6
+        max: 5
       },
-      players: [{
-        name: {
-          type: String
-        },
-        playerId: {
-          type: String
+      team: [{
+        teamnumber: {
+          type: Number,
+          required: true,
+          min: 1,
+          max: 2
         },
         gamesplayed: {
           type: Number,
@@ -37,12 +37,22 @@ var matchSchema = new mongoose.Schema({
           type: Number,
           min: 0,
           default: 0
-        }
+        },
+        players: [{
+          playername: {
+            type: String,
+            required: true
+          },
+          playerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
+          }
+        }]
       }]
     }]
   }]
-}, {
-  timestamps: true
 })
 
-module.exports = mongoose.model('Match', matchSchema)
+const Match = mongoose.model('Match', matchSchema)
+
+module.exports = Match
